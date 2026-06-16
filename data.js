@@ -18,8 +18,8 @@ window.PLAN_DATA = {
 
   weeks: [
     {
-      id: "2026-06-22",
-      label: "22–28 junio 2026",
+      id: "2026-06-15",
+      label: "15–21 junio 2026",
       cheatDay: "sabado",
 
       params: {
