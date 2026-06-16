@@ -1,0 +1,12 @@
+{
+  "name": "Plan nutricional · Jorge & Manuela",
+  "short_name": "Plan J&M",
+  "description": "Plan semanal de nutrición con seguimiento.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0e1311",
+  "theme_color": "#0e1311",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
