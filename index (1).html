@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Plan nutricional · Jorge &amp; Manuela</title>
+<meta name="theme-color" content="#0e1311">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0e1311;--panel:#151c19;--panel2:#1b2420;--line:#2a352f;
+    --ink:#e8efe9;--ink2:#9fb0a6;
+    --jorge:#7fd1ae;--manuela:#e3a86b;--accent:#9be3c4;
+    --legumbre:#c9a15a;--azul:#6fa8d6;--carne:#d68b7f;--blanco:#8fd0c4;--huevo:#e3c977;--cheat:#b07fd1;
+    --display:"Bricolage Grotesque",sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"DM Sans",sans-serif;line-height:1.55;
+       padding:max(20px,env(safe-area-inset-top)) 18px 80px;-webkit-text-size-adjust:100%}
+  .wrap{max-width:1240px;margin:0 auto}
+  .eyebrow{font-family:"DM Mono",monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink2)}
+  h1{font-family:var(--display);font-weight:800;font-size:clamp(26px,6vw,46px);line-height:.98;margin:8px 0 4px;letter-spacing:-.025em}
+  h1 span{color:var(--accent)}
+  h2{font-family:var(--display);font-weight:700;font-size:23px;letter-spacing:-.02em;margin:18px 0 4px}
+  h3{font-family:var(--display);font-weight:600;font-size:17px;letter-spacing:-.01em;margin:24px 0 10px}
+  .phase{font-family:"DM Mono",monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent)}
+  .sub{color:var(--ink2);font-size:14px;max-width:64ch;margin:4px 0 0}
+
+  .controls{position:sticky;top:0;z-index:30;background:linear-gradient(var(--bg) 78%,transparent);
+            padding:10px 0 12px;margin:14px 0 8px;display:flex;flex-direction:column;gap:10px}
+  .ctl-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .seg{display:inline-flex;background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:3px;gap:2px}
+  .seg button{font-family:"DM Sans",sans-serif;font-size:13px;font-weight:500;color:var(--ink2);background:none;border:none;
+              padding:7px 13px;border-radius:8px;cursor:pointer;white-space:nowrap;transition:color .12s,background .12s}
+  .seg button.active{background:var(--panel2);color:var(--accent);box-shadow:inset 0 0 0 1px var(--line)}
+  .seg.persons button.active[data-person="jorge"]{color:var(--jorge)}
+  .seg.persons button.active[data-person="manuela"]{color:var(--manuela)}
+  /* hover: persona cambia color de texto, fase a blanco bold */
+  .seg.persons button[data-person="ambos"]:hover{color:var(--accent)}
+  .seg.persons button[data-person="jorge"]:hover{color:var(--jorge)}
+  .seg.persons button[data-person="manuela"]:hover{color:#ec9bc4}
+  .seg button[data-fase]:hover{color:#fff;font-weight:700}
+  select#weekSel{font-family:"DM Mono",monospace;font-size:12px;color:var(--ink);background:var(--panel);
+                 border:1px solid var(--line);border-radius:9px;padding:8px 11px;margin-left:auto}
+
+  .params{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:8px 0 6px}
+  .pcard{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+  .pcard .who{font-family:var(--display);font-weight:700;font-size:18px;margin-bottom:9px;letter-spacing:-.01em}
+  .pcard.j .who{color:var(--jorge)} .pcard.m .who{color:var(--manuela)}
+  .prow{display:flex;justify-content:space-between;gap:10px;font-size:13px;padding:4px 0;border-top:1px dashed var(--line)}
+  .prow:first-of-type{border-top:none}.prow .v{font-family:"DM Mono",monospace;color:var(--ink);text-align:right}
+  .prow .big{font-weight:600;color:var(--accent)}
+
+  .scroll{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:var(--panel);margin-top:14px;-webkit-overflow-scrolling:touch}
+  table{width:100%;border-collapse:separate;border-spacing:0;font-size:12.5px}
+  th,td{padding:10px 11px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+  thead th{position:sticky;top:0;background:var(--panel2);font-family:"DM Mono",monospace;font-size:10.5px;
+           letter-spacing:.06em;text-transform:uppercase;color:var(--ink2);z-index:2;white-space:nowrap}
+  tbody tr:last-child td{border-bottom:none}
+  .rowlabel{font-family:var(--display);font-weight:600;font-size:12.5px;color:var(--ink);white-space:nowrap;
+            background:var(--panel2);position:sticky;left:0;z-index:1}
+  .total td{background:var(--panel2);font-weight:600}.total .rowlabel{color:var(--accent)}
+  .dish{font-weight:600;color:var(--ink);display:block;margin-bottom:3px}
+  .tag{display:inline-block;font-family:"DM Mono",monospace;font-size:9px;letter-spacing:.05em;text-transform:uppercase;
+       padding:1px 6px;border-radius:5px;margin-bottom:5px;color:#0e1311}
+  .t-legumbre{background:var(--legumbre)}.t-azul{background:var(--azul)}.t-carne{background:var(--carne)}
+  .t-blanco{background:var(--blanco)}.t-huevo{background:var(--huevo)}
+  .gram{font-family:"DM Mono",monospace;font-size:11px;color:var(--ink2);display:block}
+  .gram b.j{color:var(--jorge);font-weight:500}.gram b.m{color:var(--manuela);font-weight:500}
+  .kcal{font-family:"DM Mono",monospace;font-size:10.5px;color:var(--ink2);display:block;margin-top:4px;
+        border-top:1px dashed var(--line);padding-top:4px}
+  .cheat{background:repeating-linear-gradient(135deg,#1b2420,#1b2420 9px,#1f2a25 9px,#1f2a25 18px);
+         color:var(--cheat);text-align:center;font-family:var(--display);font-weight:600;vertical-align:middle}
+  .cheatsub{font-size:10px;font-weight:400;font-style:italic;display:block;margin-top:3px}
+  .empty{background:repeating-linear-gradient(135deg,#161c19,#161c19 9px,#1a201d 9px,#1a201d 18px);
+         color:#5e6b64;text-align:center;font-family:var(--display);font-weight:600;vertical-align:middle}
+
+  ul{margin:8px 0 0;padding-left:18px}li{margin:5px 0;font-size:14px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px}
+  @media(max-width:760px){.grid2{grid-template-columns:1fr}}
+  .box{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+  .box h3{margin-top:0}
+  .shop dt{font-family:"DM Mono",monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-top:13px}
+  .shop dd{margin:4px 0 0;font-size:13.5px;color:var(--ink2)}
+  .note{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:10px;
+        padding:14px 18px;margin-top:16px;font-size:13px;color:var(--ink2)}
+  .note b{color:var(--ink)}
+  .err{background:#2a1414;border:1px solid #5c2626;color:#f0b4b4;border-radius:12px;padding:16px 18px;margin-top:16px;font-size:14px}
+  footer{margin-top:44px;border-top:1px solid var(--line);padding-top:18px;font-size:11.5px;color:var(--ink2);font-family:"DM Mono",monospace}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow">Plan nutricional</div>
+  <h1>Jorge <span>&amp;</span> Manuela</h1>
+  <p class="sub">Déficit con suelo proteico. Las cifras son estimaciones sobre gramaje en crudo.</p>
+
+  <div class="controls">
+    <div class="ctl-row">
+      <div class="seg persons" role="group" aria-label="Persona">
+        <button data-person="ambos">Ambos</button>
+        <button data-person="jorge">Jorge</button>
+        <button data-person="manuela">Manuela</button>
+      </div>
+      <select id="weekSel" aria-label="Semana"></select>
+    </div>
+    <div class="ctl-row">
+      <div class="seg" role="group" aria-label="Sección">
+        <button data-fase="faseI">Fase I · Nutrición</button>
+        <button data-fase="faseII">Fase II · Menú</button>
+        <button data-fase="faseIII">Fase III · Compra</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="params" id="params"></div>
+  <div id="main"></div>
+
+  <footer>Web local · datos en data.js · solo visualización · v2</footer>
+</div>
+
+<script src="data.js"></script>
+<script>
+// Limpieza de service workers y cachés antiguos (causaban pantalla en blanco)
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.getRegistrations().then(rs => rs.forEach(r => r.unregister())).catch(()=>{});
+}
+if (window.caches && caches.keys) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))).catch(()=>{}); }
+
+(function(){
+  const D = window.PLAN_DATA;
+  const main = document.getElementById("main");
+  const paramsBox = document.getElementById("params");
+
+  if (!D || !D.weeks || !D.weeks.length) {
+    paramsBox.innerHTML = "";
+    main.innerHTML = '<div class="err">No se pudo cargar <b>data.js</b>. Comprueba que está subido en la misma carpeta que index.html.</div>';
+    return;
+  }
+
+  const DAYS = D.days;
+  const store = {
+    get(k,d){ try{const v=localStorage.getItem(k);return v===null?d:JSON.parse(v);}catch{return d;} },
+    set(k,v){ try{localStorage.setItem(k,JSON.stringify(v));}catch{} }
+  };
+  // semanas ordenadas de más reciente a más antigua; por defecto, la más reciente
+  const weeksSorted = D.weeks.slice().sort((a,b)=> a.id < b.id ? 1 : -1);
+  let state = {
+    weekId: store.get("weekId", weeksSorted[0].id),
+    person: store.get("person", "ambos"),
+    fase:   store.get("fase", "faseI")
+  };
+  if (!D.weeks.some(w=>w.id===state.weekId)) state.weekId = weeksSorted[0].id;
+
+  const week = () => D.weeks.find(w=>w.id===state.weekId) || weeksSorted[0];
+  const showJ = () => state.person !== "manuela";
+  const showM = () => state.person !== "jorge";
+  const el = (t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e;};
+  const tagLabel = t => ({legumbre:"Legumbre",carne:"Carne magra",azul:"Pescado azul",blanco:"Blanco/marisco",huevo:"Huevos"}[t]||t);
+
+  function personCell(j,m){
+    let o="";
+    if(showJ()&&j!=null) o+=`<span class="gram"><b class="j">J:</b> ${j}</span>`;
+    if(showM()&&m!=null) o+=`<span class="gram"><b class="m">M:</b> ${m}</span>`;
+    return o||`<span class="gram">—</span>`;
+  }
+  function kcalLine(jk,mk){
+    const p=[];
+    if(showJ()&&jk!=null)p.push(`J ${jk}`);
+    if(showM()&&mk!=null)p.push(`M ${mk}`);
+    return p.length?`<span class="kcal">${p.join(" · ")}</span>`:"";
+  }
+  function cheatCell(meal){
+    const txt = meal==="comida" ? 'CHEAT DAY<span class="cheatsub">Sin pesajes ni cómputo</span>' : "";
+    return `<td class="cheat">${txt}</td>`;
+  }
+  function emptyCell(meal){
+    const txt = meal==="comida" ? 'SIN REGISTRO<span class="cheatsub">Sin datos esta semana</span>' : "";
+    return `<td class="empty">${txt}</td>`;
+  }
+
+  function renderParams(){
+    const w=week(); const cards=[];
+    const pc=(cls,name,p)=>`<div class="pcard ${cls}"><div class="who">${name} · ${p.peso}</div>
+      <div class="prow"><span>Objetivo diario</span><span class="v big">${p.kcal} kcal</span></div>
+      <div class="prow"><span>Proteína</span><span class="v big">${p.prot}</span></div>
+      <div class="prow"><span>Batido</span><span class="v">${p.batido}</span></div></div>`;
+    if(showJ()) cards.push(pc("j","Jorge",w.params.jorge));
+    if(showM()) cards.push(pc("m","Manuela",w.params.manuela));
+    paramsBox.innerHTML = cards.join("");
+  }
+
+  function renderFaseI(){
+    const w=week(), f=w.faseI, wrap=el("div");
+    wrap.appendChild(el("div","phase","Fase I"));
+    wrap.appendChild(el("h2",null,"Matriz nutricional"));
+    wrap.appendChild(el("p","sub","Gramos en crudo y limpio."));
+    let head="<thead><tr><th>Ingesta</th>"; DAYS.forEach(d=>head+=`<th>${D.dayLabels[d]}</th>`); head+="</tr></thead>";
+    let body="<tbody>";
+    D.meals.forEach(meal=>{
+      body+=`<tr><td class="rowlabel">${D.mealLabels[meal]}</td>`;
+      DAYS.forEach(d=>{
+        if(d===w.cheatDay){ body+=cheatCell(meal); return; }
+        if(w.emptyDays && w.emptyDays.includes(d)){ body+=emptyCell(meal); return; }
+        const c=f[meal][d]; let inner="";
+        if(c.tag) inner+=`<span class="tag t-${c.tag}">${tagLabel(c.tag)}</span>`;
+        if(c.dish) inner+=`<span class="dish">${c.dish}</span>`;
+        inner+=personCell(c.j[0],c.m[0]);
+        inner+=kcalLine(c.j[1],c.m[1]);
+        body+=`<td>${inner}</td>`;
+      });
+      body+="</tr>";
+    });
+    body+=`<tr class="total"><td class="rowlabel">Total día</td>`;
+    DAYS.forEach(d=>{
+      if(d===w.cheatDay){ body+=`<td class="cheat"></td>`; return; }
+      if(w.emptyDays && w.emptyDays.includes(d)){ body+=`<td class="empty"></td>`; return; }
+      const t=f.totals[d]; let inner="";
+      if(showJ()) inner+=`<span class="gram"><b class="j">J:</b> ~${t.j[0]} kcal · ${t.j[1]} g</span>`;
+      if(showM()) inner+=`<span class="gram"><b class="m">M:</b> ~${t.m[0]} kcal · ${t.m[1]} g</span>`;
+      body+=`<td>${inner}</td>`;
+    });
+    body+="</tr></tbody>";
+    const sc=el("div","scroll"); const tb=el("table"); tb.innerHTML=head+body; sc.appendChild(tb); wrap.appendChild(sc);
+    return wrap;
+  }
+
+  function renderFaseII(){
+    const w=week(), f=w.faseII, wrap=el("div");
+    wrap.appendChild(el("div","phase","Fase II"));
+    wrap.appendChild(el("h2",null,"Menú gastronómico"));
+    wrap.appendChild(el("p","sub","Base mediterránea con giros latino y asiático. Picante bajo."));
+    let head="<thead><tr><th>Ingesta</th>"; DAYS.forEach(d=>head+=`<th>${D.dayLabels[d]}</th>`); head+="</tr></thead>";
+    let body="<tbody>";
+    D.meals.forEach(meal=>{
+      body+=`<tr><td class="rowlabel">${D.mealLabels[meal]}</td>`;
+      DAYS.forEach(d=>{
+        if(d===w.cheatDay){ body+= meal==="comida" ? `<td class="cheat">CHEAT DAY</td>` : `<td class="cheat"></td>`; return; }
+        if(w.emptyDays && w.emptyDays.includes(d)){ body+= meal==="comida" ? `<td class="empty">SIN REGISTRO</td>` : `<td class="empty"></td>`; return; }
+        const c=f[meal][d]; let inner="";
+        if(c.tag) inner+=`<span class="tag t-${c.tag}">${tagLabel(c.tag)}</span>`;
+        inner+= c.shared ? c.shared : personCell(c.j,c.m);
+        body+=`<td>${inner}</td>`;
+      });
+      body+="</tr>";
+    });
+    body+="</tbody>";
+    const sc=el("div","scroll"); const tb=el("table"); tb.innerHTML=head+body; sc.appendChild(tb); wrap.appendChild(sc);
+    return wrap;
+  }
+
+  function renderFaseIII(){
+    const w=week(), f=w.faseIII, wrap=el("div");
+    wrap.appendChild(el("div","phase","Fase III"));
+    wrap.appendChild(el("h2",null,"Producción y compra"));
+    const grid=el("div","grid2");
+    const b1=el("div","box"); b1.appendChild(el("h3",null,"Guía de batch cooking"));
+    const u1=el("ul"); f.batch.forEach(([t,d])=>u1.appendChild(el("li",null,`<b>${t}.</b> ${d}`))); b1.appendChild(u1);
+    const b2=el("div","box"); b2.appendChild(el("h3",null,"Sesiones de cocina"));
+    const u2=el("ul"); f.sessions.forEach(([t,d])=>u2.appendChild(el("li",null,`<b>${t}:</b> ${d}.`))); b2.appendChild(u2);
+    b2.appendChild(el("p","sub",f.sessionsNote));
+    grid.appendChild(b1); grid.appendChild(b2); wrap.appendChild(grid);
+    wrap.appendChild(el("h3",null,"Lista de la compra consolidada"));
+    const shop=el("div","box"); const dl=el("dl","shop");
+    Object.entries(f.shopping).forEach(([cat,it])=>{ dl.appendChild(el("dt",null,cat)); dl.appendChild(el("dd",null,it)); });
+    shop.appendChild(dl); wrap.appendChild(shop);
+    f.notes.forEach(n=>wrap.appendChild(el("div","note",n)));
+    return wrap;
+  }
+
+  function renderMain(){
+    main.innerHTML="";
+    if(state.fase==="faseI")   main.appendChild(renderFaseI());
+    if(state.fase==="faseII")  main.appendChild(renderFaseII());
+    if(state.fase==="faseIII") main.appendChild(renderFaseIII());
+  }
+  function syncControls(){
+    document.querySelectorAll("[data-person]").forEach(b=>b.classList.toggle("active",b.dataset.person===state.person));
+    document.querySelectorAll("[data-fase]").forEach(b=>b.classList.toggle("active",b.dataset.fase===state.fase));
+    document.getElementById("weekSel").value=state.weekId;
+  }
+  function rerender(){ renderParams(); renderMain(); syncControls(); }
+
+  const sel=document.getElementById("weekSel");
+  weeksSorted.forEach(w=>{ const o=el("option"); o.value=w.id; o.textContent=w.label; sel.appendChild(o); });
+  sel.addEventListener("change",e=>{ state.weekId=e.target.value; store.set("weekId",state.weekId); rerender(); });
+  document.querySelectorAll("[data-person]").forEach(b=>b.addEventListener("click",()=>{ state.person=b.dataset.person; store.set("person",state.person); rerender(); }));
+  document.querySelectorAll("[data-fase]").forEach(b=>b.addEventListener("click",()=>{ state.fase=b.dataset.fase; store.set("fase",state.fase); rerender(); }));
+
+  rerender();
+})();
+</script>
+</body>
+</html>
